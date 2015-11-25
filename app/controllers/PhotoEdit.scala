@@ -7,8 +7,9 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 
 import models._
@@ -46,7 +47,9 @@ class PhotoEdit @Inject()(photoDao:PhotoDao) extends Controller with Secured {
 	def update = withAuth(parse.json) { user => implicit request =>
 		request.body.validate[Photo].map{
 				case p:Photo => {
-					photoDao.save(p)
+					println("input:" + p)
+					Await.result(photoDao.save(p), 10 seconds)
+
 					Ok(p.url)
 				}
 		}.recoverTotal{
@@ -65,7 +68,7 @@ class PhotoEdit @Inject()(photoDao:PhotoDao) extends Controller with Secured {
 			// validation OK.
 			value => {
 				// update
-				photoDao.deleteReqByLabel(album, label)
+				Await.result(photoDao.deleteReqByLabel(album, label), 10 seconds)
 				Redirect(routes.Application.sheet(album, label))
 			}
 		)

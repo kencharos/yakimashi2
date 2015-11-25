@@ -80,8 +80,8 @@ $(document).ready(function(){
 			function(data){
 
 				$("#inline_content :checkbox").removeAttr("checked")
-				for(i in data.labels) {
-						var label = data.labels[i]
+				for(i in data.reqs) {
+						var label = data.reqs[i]
 						// if reopen inline window, checkbox is not chekced by attr("checked", true)
 						$("#label_" + label).each(function(){this.click()})
 				}
@@ -112,13 +112,12 @@ $(document).ready(function(){
 			}
 		})
 		var json = {
-			id:$("#id").val(),
 			album:$("#album").val(),
 			name:$("#name").val(),
 			comment:$("#comment").val(),
 			etc:parseInt($("#etc option:selected").val()),
 			noDisp:$("#noDisp").is(':checked'),
-			labels:array
+			reqs:array
 		};
 		$.ajax({url:"/photo",
 			type:"POST",
@@ -126,7 +125,7 @@ $(document).ready(function(){
 			dataType: "text", //responce data tyoe
 			contentType:"application/json; charset=utf-8"
 		}).done(function(imgUrl) {
-				var cnt = json.labels.length + json.etc
+				var cnt = json.reqs.length + json.etc
 				var tile = $("div.tile img[src$='" + imgUrl + "']").parent().parent().parent();
 				$("span.count", tile).text(cnt + "")
 				if (json.noDisp) {

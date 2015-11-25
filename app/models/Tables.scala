@@ -104,10 +104,11 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
       .join(PhotoRequests).on {case (a,b) => a.album === b.album && a.name === b.name}
 
     db.run(q.result).map{
-      case Nil => None
-      case x::xs => {
-        val p = x._1
-        val reqs = x._2 :: xs.map(_._2)
+      case x if x.size == 0 => None
+      case x => {
+        val p = x.head._1
+        println("Get:" + p)
+        val reqs = x.map(_._2)
         Some(Photo(p.album, p.name, p.etc, p.comment, p.noDisp, reqs))
       }
     }
@@ -118,7 +119,7 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
       for (p <- Photos if (p.album === album)
       ) yield (p)
     // subquery exisits.
-    db.run(query.filter(p => p.reqs.filter(_.labelId === label).exists).result)
+    db.run(query.filter(p => PhotoRequests.filter(r => r.labelId === label && p.name === r.name && p.album===r.album).exists).result)
   }
 
   def deleteReqByLabel(album:String, labelId:String) = {
@@ -131,32 +132,37 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     PhotoRequests.filter(r => r.album === p.album && r.name === p.name).delete
   }
   private def insertReq(p:Photo) = {
+    println(p.reqs)
     PhotoRequests ++= p.reqs
   }
 
   def save(photo:Photo) = {
     val p = PhotoInner(photo.album, photo.name, photo.etc, photo.comment, photo.noDisp)
-    db.run(deleteReq(photo).andThen(Photos.insertOrUpdate(p))
-      .andThen(insertReq(photo))
-    )
+    def innerSave(photo:PhotoInner) = {
+      println(photo)
+      Photos.insertOrUpdate(photo)
+    }
+    //db.run(deleteReq(photo)>>innerSave(p)>>insertReq(photo))
+  db.run(DBIO.seq(innerSave(p),deleteReq(photo),insertReq(photo)).transactionally)
   }
 
   // テーブル定義。必須。
   private class PhotosTable(tag: Tag) extends Table[PhotoInner](tag, "T_PHOTO") {
     // IDは大文字である必要がある。
-    def album = column[String]("ALBUM", O.PrimaryKey)
-    def name = column[String]("NAME", O.PrimaryKey)
+    def album = column[String]("ALBUM")
+    def name = column[String]("NAME")
     def etc = column[Int]("ETC")
     def comment = column[String]("COMMENT")
     def noDisp = column[Boolean]("NO_DISP")
-    def reqs = foreignKey("FK_PHOTO_REQ", (album, name),PhotoRequests)(l => (l.album, l.name))
+    def pks = primaryKey("PK_PHOTO", (album, name))
     def * = (album, name,etc,comment, noDisp) <>(PhotoInner.tupled, PhotoInner.unapply _)
   }
   private class PhotoRequestTable(tag: Tag) extends Table[PhotoRequest](tag, "T_PHOTO_REQUEST") {
     // IDは大文字である必要がある。
-    def album = column[String]("ALBUM", O.PrimaryKey)
-    def name = column[String]("NAME", O.PrimaryKey)
-    def labelId = column[String]("LABEL_ID", O.PrimaryKey)
+    def album = column[String]("ALBUM")
+    def name = column[String]("NAME")
+    def labelId = column[String]("LABEL_ID")
+    def pks = primaryKey("PK_PHOTO_REQUEST", (album, name, labelId))
     def * = (album, name, labelId) <>(PhotoRequest.tupled, PhotoRequest.unapply _)
   }
 }
