@@ -1,0 +1,32 @@
+@(album:String, photos:Seq[models.PhotoInner], label:models.Label, labels:Seq[models.Label])(implicit session:Session,flash:Flash, messages:Messages)
+@import helper._
+
+@main(album) {
+		<script src="@routes.Assets.at("javascripts/sheet.js")" type="text/javascript"></script>
+		@flash.get("error").map { message =>
+				<p class="error">@message</p>
+		}
+		<p style="border-bottom: 1px solid">選択した人の写真を見る<br>
+			@for(l <- labels){
+				<input type="radio" name="target" value="@l.id" id="label_@l.id" @if(l.id==label.id){checked}>
+				<label for="label_@l.id">@l.name</label>&nbsp;
+			}
+		</p>
+		<div>@album:"@label.name"に送る写真 &nbsp;<span>@photos.length 枚</span>
+		</div>
+		@for(photo <- photos) {
+			<div class="tile"><div>
+				<a href="@routes.Assets.at(photo.url)" class="swipebox" title="@photo.comment">
+					<img src="@routes.Assets.at(photo.url)" alt="@photo.comment">
+				</a>
+			</div></div>
+		}
+	<div style='display:none'>
+		<div id='inline'>
+			@helper.form(action = routes.PhotoEdit.deleteLabel(album, label.id)) {
+				<input type="hidden" id="name" name="name">
+				<input type="submit" value="プリント対象から外す"/>
+			}
+		</div>
+	</div>
+}

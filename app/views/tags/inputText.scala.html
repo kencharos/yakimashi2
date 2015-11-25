@@ -1,0 +1,14 @@
+@import play.api.i18n.Messages
+@(f: Field, keyValues: (Symbol, String)* )(implicit messages:Messages)
+<div class="@if(f.errors.isEmpty){clearfix}else{clearfix  error}" id="@f.name.concat("_field")">
+    <label for="@f.name">@keyValues.toMap.get('_label).getOrElse("")</label>
+    <div class="input">
+        <input type="@keyValues.toMap.get('_type).getOrElse("text")" id="@f.name" name="@f.name" value="@f.value" >
+
+        <span class="help-inline">@if(!f.errors.isEmpty) {
+                @Messages(f.errors(0).messages(0))
+            }</span>
+        <span class="help-block">@f.constraints.map(_._1)</span>
+    </div>
+</div>
+

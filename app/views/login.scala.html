@@ -1,0 +1,34 @@
+@(userForm: Form[(String, String)])(implicit flash:Flash,session:Session, messages:Messages)
+@import helper._
+@import tags._
+
+@main("ログイン") {
+
+ 	@helper.form(action = routes.Auth.authenticate) {
+	<h2>ログイン</h2>
+    <p>sample user is "test"(password is "test").</p>
+        @userForm.globalError.map { error =>
+              <p class="error">
+                  @error.message
+              </p>
+        }
+
+        @flash.get("success").map { message =>
+             <p class="success">
+                     @message
+              </p>
+       }
+        @tags.inputText(
+          userForm("user"),
+          '_label -> "ユーザー"
+        )
+
+        @tags.inputText(
+            userForm("password"),
+            '_label -> "パスワード",
+            '_type -> "password"
+        )
+
+		<input type="submit" value="ログイン" />
+	}
+}

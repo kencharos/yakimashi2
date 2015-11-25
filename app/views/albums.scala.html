@@ -1,0 +1,10 @@
+@(albums: Seq[String])(implicit session:Session, messages:Messages)
+
+@main("albums") {
+   <p>アルバムを選択</p>
+   <ul class="album">
+   @for(name <- albums) {
+   		<li><a href="/albums/@name">@name</a></li>
+   }
+   </ul>
+}

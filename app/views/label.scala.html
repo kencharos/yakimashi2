@@ -1,0 +1,17 @@
+@(labelForm: Form[Seq[models.Label]])(implicit session:Session, messages:Messages)
+@import helper._
+@import tags._
+
+@main("ラベル編集") {
+	@helper.form(action = routes.LabelEdit.update) {
+
+		@repeat(labelForm("labels")) { label =>
+			@tags.inputText(
+				label("name"),
+				'_label -> label("id").value.get
+			)
+            <input type="hidden" name="@label("id").name" value="@label("id").value">
+		}
+		<input type="submit" value="登録" />
+	}
+}
