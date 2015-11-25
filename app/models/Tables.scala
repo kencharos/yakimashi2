@@ -144,19 +144,19 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   // テーブル定義。必須。
   private class PhotosTable(tag: Tag) extends Table[PhotoInner](tag, "T_PHOTO") {
     // IDは大文字である必要がある。
-    def album = column[String]("album", O.PrimaryKey)
-    def name = column[String]("name", O.PrimaryKey)
-    def etc = column[Int]("etc")
-    def comment = column[String]("comment")
-    def noDisp = column[Boolean]("noDisp")
+    def album = column[String]("ALBUM", O.PrimaryKey)
+    def name = column[String]("NAME", O.PrimaryKey)
+    def etc = column[Int]("ETC")
+    def comment = column[String]("COMMENT")
+    def noDisp = column[Boolean]("NO_DISP")
     def reqs = foreignKey("FK_PHOTO_REQ", (album, name),PhotoRequests)(l => (l.album, l.name))
     def * = (album, name,etc,comment, noDisp) <>(PhotoInner.tupled, PhotoInner.unapply _)
   }
-  private class PhotoRequestTable(tag: Tag) extends Table[PhotoRequest](tag, "T_PHOTO_REQ") {
+  private class PhotoRequestTable(tag: Tag) extends Table[PhotoRequest](tag, "T_PHOTO_REQUEST") {
     // IDは大文字である必要がある。
-    def album = column[String]("album", O.PrimaryKey)
-    def name = column[String]("name", O.PrimaryKey)
-    def labelId = column[String]("label_id", O.PrimaryKey)
+    def album = column[String]("ALBUM", O.PrimaryKey)
+    def name = column[String]("NAME", O.PrimaryKey)
+    def labelId = column[String]("LABEL_ID", O.PrimaryKey)
     def * = (album, name, labelId) <>(PhotoRequest.tupled, PhotoRequest.unapply _)
   }
 }

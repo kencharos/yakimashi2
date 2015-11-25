@@ -26,6 +26,7 @@ class Auth @Inject()(userDao:UserDao) extends Controller {
   )
 
   def check(user: String, password: String) = {
+    println(password + "->" + hash(password))
     val f = userDao.find(user).map{
 	   case Some(u) => hash(password) == u.password
      case 	None => false
@@ -36,7 +37,7 @@ class Auth @Inject()(userDao:UserDao) extends Controller {
   def hash(str:String) = {
      val md = MessageDigest.getInstance("SHA-256");
 	 md.update(str.getBytes())
-	 md.digest().foldLeft("")((s, b) => s + "%02x".format(if(b < 0) b + 256 else b))
+	 md.digest().foldLeft("")((s, b) => s + "%02x".format(if(b < 0) b + 256 else b)).toUpperCase
   }
   
   def login = Action { implicit request =>
