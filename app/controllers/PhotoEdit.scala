@@ -48,7 +48,6 @@ class PhotoEdit @Inject()(photoDao:PhotoDao) extends Controller with Secured {
 		request.body.validate[Photo].map{
 				case p:Photo => {
 					val res = Await.result(photoDao.save(p), 10 seconds)
-					println(res)
 					Ok(p.url)
 				}
 		}.recoverTotal{
