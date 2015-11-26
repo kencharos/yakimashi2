@@ -33,11 +33,11 @@ class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) 
     db.run(q.result.headOption)
   }
   // テーブル定義。必須。
-  private class UsersTable(tag: Tag) extends Table[User](tag, "T_USER") {
+  private class UsersTable(tag: Tag) extends Table[User](tag, "t_user") {
     // IDは大文字である必要がある。
-    def id = column[String]("ID", O.PrimaryKey)
+    def id = column[String]("id", O.PrimaryKey)
 
-    def password = column[String]("PASSWORD")
+    def password = column[String]("password")
     // SQL取得結果とcase classへのマッピング
     def * = (id, password) <>(User.tupled, User.unapply _)
   }
@@ -61,11 +61,11 @@ class LabelDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   def update(label:Label) = db.run(Labels.filter(_.id === label.id).map(_.name).update(label.name))
 
   // テーブル定義。必須。
-  private class LabelsTable(tag: Tag) extends Table[Label](tag, "T_LABEL") {
+  private class LabelsTable(tag: Tag) extends Table[Label](tag, "t_label") {
     // IDは大文字である必要がある。
-    def id = column[String]("ID", O.PrimaryKey)
+    def id = column[String]("id", O.PrimaryKey)
 
-    def name = column[String]("NAME")
+    def name = column[String]("name")
     def * = (id, name) <>(Label.tupled, Label.unapply _)
   }
 }
@@ -138,8 +138,8 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   def save(photo:Photo) = {
     val p = PhotoInner(photo.album, photo.name, photo.etc, photo.comment, photo.noDisp)
     def innerSave(pi:PhotoInner) = {
-      //Photos.filter(p => p.album === photo.album && p.name === photo.name).delete  >> (Photos += pi )
-      Photos.insertOrUpdate(pi)
+      Photos.filter(p => p.album === photo.album && p.name === photo.name).delete  >> (Photos += pi )
+      //Photos.insertOrUpdate(pi)
     }
 
     val action = for(
@@ -151,20 +151,20 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   }
 
   // テーブル定義。必須。
-  private class PhotosTable(tag: Tag) extends Table[PhotoInner](tag, "T_PHOTO") {
-    def album = column[String]("ALBUM")
-    def name = column[String]("NAME")
-    def etc = column[Int]("ETC")
-    def comment = column[String]("COMMENT")
-    def noDisp = column[Boolean]("NO_DISP")
-    def pks = primaryKey("PK_PHOTO", (album, name))
+  private class PhotosTable(tag: Tag) extends Table[PhotoInner](tag, "t_photo") {
+    def album = column[String]("album")
+    def name = column[String]("name")
+    def etc = column[Int]("etc")
+    def comment = column[String]("comment")
+    def noDisp = column[Boolean]("no_disp")
+    def pks = primaryKey("pk_photo", (album, name))
     def * = (album, name,etc,comment, noDisp) <>(PhotoInner.tupled, PhotoInner.unapply _)
   }
-  private class PhotoRequestTable(tag: Tag) extends Table[PhotoRequest](tag, "T_PHOTO_REQUEST") {
-    def album = column[String]("ALBUM")
-    def name = column[String]("NAME")
-    def labelId = column[String]("LABEL_ID")
-    def pks = primaryKey("PK_PHOTO_REQUEST", (album, name, labelId))
+  private class PhotoRequestTable(tag: Tag) extends Table[PhotoRequest](tag, "t_photo_request") {
+    def album = column[String]("album")
+    def name = column[String]("name")
+    def labelId = column[String]("label_id")
+    def pks = primaryKey("pk_photo_request", (album, name, labelId))
     def * = (album, name, labelId) <>(PhotoRequest.tupled, PhotoRequest.unapply _)
   }
 }
