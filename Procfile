@@ -1,0 +1,1 @@
+web: target/universal/stage/bin/yakimashi2 -Dapplication.secret="changeme" -Dhttp.port=${PORT} -Dplay.evolutions.db.default.autoApply=true -Dslick.dbs.default.db.url=${JDBC_DATABASE_URL}
