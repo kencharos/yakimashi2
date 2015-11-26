@@ -11,8 +11,8 @@ libraryDependencies ++= Seq(
   ws,
   specs2 % Test,
   "org.webjars" % "bootstrap" % "3.3.5",
-  "com.typesafe.play" %% "play-slick" % "1.0.1",
-  "com.typesafe.play" %% "play-slick-evolutions" % "1.0.1",
+  "com.typesafe.play" %% "play-slick" % "1.1.1",
+  "com.typesafe.play" %% "play-slick-evolutions" % "1.1.1",
   "com.h2database" % "h2" % "1.4.187",
   "com.drewnoakes" % "metadata-extractor" % "2.6.2"
 )

@@ -54,12 +54,12 @@ class Application @Inject()(photoDao:PhotoDao, labelDao: LabelDao) extends Contr
       photoDao.findOneByName(album, f.getName).map{
           case None => Photo(album = album, name = f.getName)
           case Some(p)=> p
-        }.filter(!_.noDisp)
+        }
     }
     val labels = labelDao.sorted
 
     val data = (Future.sequence(photo)) zip labels
-    data.map{case (ps, ls) => Ok(views.html.print(album, ps, ls))}
+    data.map{case (ps, ls) => Ok(views.html.print(album, ps.filterNot(_.noDisp), ls))}
 
   }
   def sheet(album:String, label:String) = withAuthAsync{ user => implicit request =>

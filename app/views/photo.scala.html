@@ -8,7 +8,7 @@
 		<div>@name	<span id="print"></span>枚&nbsp;
 			<input type="checkbox" id="zero"/><label for="zero">0枚の写真を隠す</label>
 			&nbsp;
-			<input type="checkbox" id="nodisp_check"/><label for="nodisp_check">非表示の写真を表示</label>
+			<input type="checkbox" id="nodisp_check"/><label for="nodisp_check">非表示(削除候補)も表示</label>
 			&nbsp;
 			<filedset>
 				<select id="sheet">@for(l <- label){<option value="@l.id">@l.name</option>}</select>&gt;
@@ -16,6 +16,7 @@
 			</filedset>
 			&nbsp;
 			<input id="command" type="button" value="コマンドを見る(作者用)">
+			<input id="showNoDisp" type="button" value="削除候補一覧">
 			<a href="/albums/@name/print" target="_blank">印刷用ページ</a>
 		</div>
    @for(photo <- photos) {
@@ -29,7 +30,7 @@
 					case Some(d) =>{<span class="date">@String.format("%tY/%tm/%td", d, d, d)</span>}
 					case None => {}
 				}
-				<span class="label">@photo._1.reqs.map(_.labelId)mkString(",")</span>
+				<span class="label">@photo._1.reqs.map(_.labelId).mkString(",")</span>
 				</div>
    		</div>
    }
@@ -48,7 +49,7 @@
 			その他<select id="etc">
 				@for(i <- 0 to 10) { <option value="@i">@i</option>}
 			</select>
-			<label for="noDisp"><input id="noDisp" type="checkbox" />非表示にする</label>
+			<label for="noDisp"><input id="noDisp" type="checkbox" />非表示(削除候補)</label>
 			</fieldset>
 			<fieldset><legend>コメント</legend>
 				<textarea rows="2" id="comment"></textarea>

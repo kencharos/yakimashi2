@@ -47,9 +47,8 @@ class PhotoEdit @Inject()(photoDao:PhotoDao) extends Controller with Secured {
 	def update = withAuth(parse.json) { user => implicit request =>
 		request.body.validate[Photo].map{
 				case p:Photo => {
-					println("input:" + p)
-					Await.result(photoDao.save(p), 10 seconds)
-
+					val res = Await.result(photoDao.save(p), 10 seconds)
+					println(res)
 					Ok(p.url)
 				}
 		}.recoverTotal{

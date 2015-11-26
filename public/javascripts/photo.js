@@ -71,6 +71,19 @@ $(document).ready(function(){
 		alert(c)
 	})
 
+
+	$("#showNoDisp").click(function() {
+		var res = new Array();
+		$("div.tile").each(function(){
+			if ($(this).hasClass("nodisp")) {
+				var name = $("img", $(this)).attr("src").split("/").reverse()[0];
+				res.push(name)
+			}
+		})
+
+		alert(res.join("\n"))
+	})
+
 	// ajax functions
 	var initialDetail = function(img) {
 		var path = img.split("/")
@@ -119,6 +132,18 @@ $(document).ready(function(){
 			noDisp:$("#noDisp").is(':checked'),
 			reqs:array
 		};
+
+		if (json.noDisp) {
+		    json.etc = 0;
+		    json.reqs = [];
+		    $("#inline_content input[type='checkbox']").each(function(){
+                if (this.id.indexOf("label_") == 0 && this.checked) {
+                    this.checked = false;
+                }
+            })
+			$("#etc").val(0);
+		}
+
 		$.ajax({url:"/photo",
 			type:"POST",
 			data:JSON.stringify(json),

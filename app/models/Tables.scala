@@ -2,6 +2,7 @@ package models
 
 import com.google.inject.{Singleton, Inject}
 import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
+import slick.dbio.DBIOAction
 import slick.driver.JdbcProfile
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
@@ -101,14 +102,13 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
 
   def findOneByName(album:String, name:String):Future[Option[Photo]] = {
     val q =Photos.filter(p => p.album === album && p.name === name)
-      .join(PhotoRequests).on {case (a,b) => a.album === b.album && a.name === b.name}
+      .joinLeft(PhotoRequests).on {case (a,b) => a.album === b.album && a.name === b.name}
 
     db.run(q.result).map{
       case x if x.size == 0 => None
       case x => {
         val p = x.head._1
-        println("Get:" + p)
-        val reqs = x.map(_._2)
+        val reqs = x.map(_._2).flatten // List[Option[A]] -> List[A]
         Some(Photo(p.album, p.name, p.etc, p.comment, p.noDisp, reqs))
       }
     }
@@ -132,23 +132,26 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     PhotoRequests.filter(r => r.album === p.album && r.name === p.name).delete
   }
   private def insertReq(p:Photo) = {
-    println(p.reqs)
     PhotoRequests ++= p.reqs
   }
 
   def save(photo:Photo) = {
     val p = PhotoInner(photo.album, photo.name, photo.etc, photo.comment, photo.noDisp)
-    def innerSave(photo:PhotoInner) = {
-      println(photo)
-      Photos.insertOrUpdate(photo)
+    def innerSave(pi:PhotoInner) = {
+      //Photos.filter(p => p.album === photo.album && p.name === photo.name).delete  >> (Photos += pi )
+      Photos.insertOrUpdate(pi)
     }
-    //db.run(deleteReq(photo)>>innerSave(p)>>insertReq(photo))
-  db.run(DBIO.seq(innerSave(p),deleteReq(photo),insertReq(photo)).transactionally)
+
+    val action = for(
+      a  <- deleteReq(photo);
+      b <- innerSave(p);
+      c <- insertReq(photo)
+    ) yield(a,b,c) // update/insert counts
+    db.run(action.transactionally)
   }
 
   // テーブル定義。必須。
   private class PhotosTable(tag: Tag) extends Table[PhotoInner](tag, "T_PHOTO") {
-    // IDは大文字である必要がある。
     def album = column[String]("ALBUM")
     def name = column[String]("NAME")
     def etc = column[Int]("ETC")
@@ -158,7 +161,6 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     def * = (album, name,etc,comment, noDisp) <>(PhotoInner.tupled, PhotoInner.unapply _)
   }
   private class PhotoRequestTable(tag: Tag) extends Table[PhotoRequest](tag, "T_PHOTO_REQUEST") {
-    // IDは大文字である必要がある。
     def album = column[String]("ALBUM")
     def name = column[String]("NAME")
     def labelId = column[String]("LABEL_ID")
