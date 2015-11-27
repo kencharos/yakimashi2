@@ -9,8 +9,8 @@ import models._
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
+import scala.concurrent.{Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class LabelEdit @Inject()(labelDao:LabelDao)  extends Controller with Secured {
 
@@ -20,21 +20,22 @@ class LabelEdit @Inject()(labelDao:LabelDao)  extends Controller with Secured {
         "id" -> text ,
         "name" -> nonEmptyText)(Label.apply)(Label.unapply)))
 
-  def info = withAuth{ user => implicit request =>
-    val labels = Await.result(labelDao.sorted, 5 seconds)
-    Ok(views.html.label(labelForm.fill(labels)))
-
+  def info = withAuthAsync{ user => implicit request =>
+    labelDao.sorted.map { labels =>
+      Ok(views.html.label(labelForm.fill(labels)))
+    }
   }
 
-  def update = withAuth{ user => implicit request =>
+  def update = withAuthAsync{ user => implicit request =>
     labelForm.bindFromRequest.fold(
       // on validation error
-      errors => BadRequest(views.html.label(errors)),
+      errors => Future(BadRequest(views.html.label(errors))),
       // validation OK.
       labels => {
       	// update name
-      	labels.foreach{labelDao.update}
-      	Ok(views.html.label(labelForm.fill(labels)))
+      	labelDao.updateLabels(labels).map { _ =>
+          Ok(views.html.label(labelForm.fill(labels)))
+        }
       }
     )
   }

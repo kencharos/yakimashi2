@@ -58,7 +58,9 @@ class LabelDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
 
   def sorted:Future[Seq[Label]] = db.run(Labels.sortBy(_.id).result)
 
-  def update(label:Label) = db.run(Labels.filter(_.id === label.id).map(_.name).update(label.name))
+  def updateLabels(labels:Seq[Label]) = db.run(
+    DBIO.sequence(labels.map(label => Labels.filter(_.id === label.id).map(_.name).update(label.name)))
+  )
 
   // テーブル定義。必須。
   private class LabelsTable(tag: Tag) extends Table[Label](tag, "t_label") {
@@ -138,8 +140,8 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   def save(photo:Photo) = {
     val p = PhotoInner(photo.album, photo.name, photo.etc, photo.comment, photo.noDisp)
     def innerSave(pi:PhotoInner) = {
-      Photos.filter(p => p.album === photo.album && p.name === photo.name).delete  >> (Photos += pi )
-      //Photos.insertOrUpdate(pi)
+      //Photos.filter(p => p.album === photo.album && p.name === photo.name).delete  >> (Photos += pi )
+      Photos.insertOrUpdate(pi)
     }
 
     val action = for(
@@ -152,8 +154,8 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
 
   // テーブル定義。必須。
   private class PhotosTable(tag: Tag) extends Table[PhotoInner](tag, "t_photo") {
-    def album = column[String]("album")
-    def name = column[String]("name")
+    def album = column[String]("album", O.PrimaryKey)
+    def name = column[String]("name", O.PrimaryKey)
     def etc = column[Int]("etc")
     def comment = column[String]("comment")
     def noDisp = column[Boolean]("no_disp")
@@ -161,9 +163,9 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     def * = (album, name,etc,comment, noDisp) <>(PhotoInner.tupled, PhotoInner.unapply _)
   }
   private class PhotoRequestTable(tag: Tag) extends Table[PhotoRequest](tag, "t_photo_request") {
-    def album = column[String]("album")
-    def name = column[String]("name")
-    def labelId = column[String]("label_id")
+    def album = column[String]("album", O.PrimaryKey)
+    def name = column[String]("name", O.PrimaryKey)
+    def labelId = column[String]("label_id", O.PrimaryKey)
     def pks = primaryKey("pk_photo_request", (album, name, labelId))
     def * = (album, name, labelId) <>(PhotoRequest.tupled, PhotoRequest.unapply _)
   }
