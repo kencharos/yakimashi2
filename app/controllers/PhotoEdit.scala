@@ -21,14 +21,15 @@ class PhotoEdit @Inject()(photoDao:PhotoDao) extends Controller with Secured {
 	implicit val photoFormat = (
 			(__ \ "album").format[String] and
 			(__ \ "name").format[String] and
+			(__ \ "exifDate").format[String] and
 			(__ \ "etc").format[Int] and
 			(__ \ "comment").format[String] and
 			(__ \ "noDisp").format[Boolean] and
 			(__ \ "reqs").format[Seq[String]]
 		)(
-			( album, name, etc, comment, noDisp, labels)
-			=> Photo(album, name, etc, comment, noDisp, labels.map(PhotoRequest(album, name, _)))
-		,unlift((p:Photo) => Some(p.album, p.name, p.etc, p.comment, p.noDisp, p.reqs.map(_.labelId)))
+			( album, name,exifDate, etc, comment, noDisp, labels)
+			=> Photo(album, name,exifDate, etc, comment, noDisp, labels.map(PhotoRequest(album, name, _)))
+		,unlift((p:Photo) => Some(p.album, p.name, p.exifDate, p.etc, p.comment, p.noDisp, p.reqs.map(_.labelId)))
 	)
 
 	val labelDeleteForm = Form(

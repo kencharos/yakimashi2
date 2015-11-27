@@ -6,7 +6,7 @@
 		@flash.get("error").map { message =>
 				<p class="error">@message</p>
 		}
-		<p style="border-bottom: 1px solid">選択した人の写真を見る<br>
+		<p style="border-bottom: 1px solid">選択した人の写真を見る  <a href="../@album">戻る</a><br>
 			@for(l <- labels){
 				<input type="radio" name="target" value="@l.id" id="label_@l.id" @if(l.id==label.id){checked}>
 				<label for="label_@l.id">@l.name</label>&nbsp;
