@@ -16,8 +16,8 @@
 		</div>
 		@for(photo <- photos) {
 			<div class="tile"><div>
-				<a href="@routes.Assets.at(photo.url)" class="swipebox" title="@photo.comment">
-					<img src="@routes.Assets.at(photo.url)" alt="@photo.comment">
+				<a href="@photo.url" class="swipebox" title="@photo.comment">
+					<img src="@photo.url" alt="@photo.comment">
 				</a>
 			</div></div>
 		}
