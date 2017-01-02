@@ -15,7 +15,7 @@ create table T_LABEL (
 create table T_PHOTO (
   album    varchar(255) not null,
   name     varchar(255) not null,
-  exif_date     varchar(10) ,
+  url    varchar(1200),
   etc   integer,
   comment varchar(300),
   no_disp boolean,

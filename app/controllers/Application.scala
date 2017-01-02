@@ -5,8 +5,6 @@ import play.api._
 import play.api.mvc._
 import models._
 import java.io.File
-import com.drew.imaging._
-import com.drew.metadata.exif.ExifSubIFDDirectory
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
@@ -39,15 +37,10 @@ class Application @Inject()(photoDao:PhotoDao, labelDao: LabelDao) extends Contr
   }}
 
   def print(album:String) = withAuthAsync{ user => implicit request =>
-    val photo = getImages(album).map{ f =>
-      photoDao.findOneByName(album, f.getName).map{
-          case None => Photo(album = album, name = f.getName)
-          case Some(p)=> p
-        }
-    }
+    val photo = photoDao.findOneByAlbum(album)
     val labels = labelDao.sorted
 
-    val data = (Future.sequence(photo)) zip labels
+    val data = photo zip labels
     data.map{case (ps, ls) => Ok(views.html.print(album, ps.filterNot(_.noDisp), ls))}
 
   }

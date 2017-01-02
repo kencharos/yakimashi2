@@ -74,7 +74,7 @@ class LabelDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
 
 case class PhotoInner(album:String,
                  name:String,
-                 exifDate:String = "",
+                      ulr:String,
                  etc:Int = 0,
                  comment:String = "",
                  noDisp:Boolean = false){
@@ -83,12 +83,11 @@ case class PhotoInner(album:String,
 
 case class Photo(album:String,
                  name:String,
-                 exifDate:String = "",
+                 url:String,
                  etc:Int = 0,
                  comment:String = "",
                  noDisp:Boolean = false,
                  reqs:Seq[PhotoRequest] = Seq()){
-  def url = "album/" + album + "/" + name
   def count = reqs.size + etc
 }
 
@@ -113,7 +112,7 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
       case x => {
         val p = x.head._1
         val reqs = x.map(_._2).flatten // List[Option[A]] -> List[A]
-        Some(Photo(p.album, p.name, p.exifDate, p.etc, p.comment, p.noDisp, reqs))
+        Some(Photo(p.album,p.name,  p.url, p.etc, p.comment, p.noDisp, reqs))
       }
     }
   }
@@ -134,7 +133,7 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
         def groupByPhoto(p:PhotoInner, recs:Iterable[(PhotoInner, Option[PhotoRequest])]) = {
 
           val reqs = recs.map(_._2).flatten.toSeq // List[Option[A]] -> List[A]
-          Photo(p.album, p.name, p.exifDate, p.etc, p.comment, p.noDisp, reqs)
+          Photo(p.album, p.name, p.url, p.etc, p.comment, p.noDisp, reqs)
         }
 
         x.groupBy{case (p, req) => p}.map{case (p, recs) => groupByPhoto(p, recs)}.toSeq
@@ -164,7 +163,7 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   }
 
   def save(photo:Photo) = {
-    val p = PhotoInner(photo.album, photo.name, photo.exifDate, photo.etc, photo.comment, photo.noDisp)
+    val p = PhotoInner(photo.album, photo.name, photo.url, photo.etc, photo.comment, photo.noDisp)
     def innerSave(pi:PhotoInner) = {
       //Photos.filter(p => p.album === photo.album && p.name === photo.name).delete  >> (Photos += pi )
       Photos.insertOrUpdate(pi)
@@ -182,12 +181,12 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   private class PhotosTable(tag: Tag) extends Table[PhotoInner](tag, "t_photo") {
     def album = column[String]("album", O.PrimaryKey)
     def name = column[String]("name", O.PrimaryKey)
-    def exifDate = column[String]("exif_date", O.PrimaryKey)
+    def url = column[String]("url", O.PrimaryKey)
     def etc = column[Int]("etc")
     def comment = column[String]("comment")
     def noDisp = column[Boolean]("no_disp")
     def pks = primaryKey("pk_photo", (album, name))
-    def * = (album, name,exifDate,etc,comment, noDisp) <>(PhotoInner.tupled, PhotoInner.unapply _)
+    def * = (album, name,url,etc,comment, noDisp) <>(PhotoInner.tupled, PhotoInner.unapply _)
   }
   private class PhotoRequestTable(tag: Tag) extends Table[PhotoRequest](tag, "t_photo_request") {
     def album = column[String]("album", O.PrimaryKey)

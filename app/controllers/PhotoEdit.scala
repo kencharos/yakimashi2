@@ -21,15 +21,15 @@ class PhotoEdit @Inject()(photoDao:PhotoDao) extends Controller with Secured {
 	implicit val photoFormat = (
 			(__ \ "album").format[String] and
 			(__ \ "name").format[String] and
-			(__ \ "exifDate").format[String] and
+			(__ \ "url").format[String] and
 			(__ \ "etc").format[Int] and
 			(__ \ "comment").format[String] and
 			(__ \ "noDisp").format[Boolean] and
 			(__ \ "reqs").format[Seq[String]]
 		)(
-			( album, name,exifDate, etc, comment, noDisp, labels)
-			=> Photo(album, name,exifDate, etc, comment, noDisp, labels.map(PhotoRequest(album, name, _)))
-		,unlift((p:Photo) => Some(p.album, p.name, p.exifDate, p.etc, p.comment, p.noDisp, p.reqs.map(_.labelId)))
+			( album, name,url, etc, comment, noDisp, labels)
+			=> Photo(album, name,url, etc, comment, noDisp, labels.map(PhotoRequest(album, name, _)))
+		,unlift((p:Photo) => Some(p.album, p.name, p.url, p.etc, p.comment, p.noDisp, p.reqs.map(_.labelId)))
 	)
 
 	val labelDeleteForm = Form(
@@ -40,7 +40,7 @@ class PhotoEdit @Inject()(photoDao:PhotoDao) extends Controller with Secured {
 		val photoFuture = photoDao.findOneByName(album, name)
 		photoFuture.map{
 			case Some(x) => Ok(Json.toJson(x)).as("application/json")
-			case None => Ok(Json.toJson(Photo(album = album, name = name))).as("application/json")
+			case None => Ok(Json.toJson(Photo(album = album, name = name, url=""))).as("application/json")
 		}
 
 	}

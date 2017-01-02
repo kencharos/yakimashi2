@@ -1,16 +1,10 @@
 # --- !Ups
-insert into t_photo values('sample', 'Chrysanthemum.jpg', '', 0, '', false);
-insert into t_photo values('sample', 'Desert.jpg', '', 0, '', false);
-insert into t_photo values('sample', 'DSCN4033.jpg', '2012/12/09', 0, '', false);
-insert into t_photo values('sample', 'Hydrangeas.jpg', '', 0, '', false);
-insert into t_photo values('sample', 'IMG_1154.jpg', '2013/03/23', 0, '', false);
-insert into t_photo values('sample', 'IMG_1418.jpg', '2013/04/26', 0, '', false);
-insert into t_photo values('sample', 'IMG_1719.jpg', '2013/04/28', 0, '', false);
-insert into t_photo values('sample', 'Jellyfish.jpg', '', 0, '', false);
-insert into t_photo values('sample', 'Koala.jpg', '', 0, '', false);
-insert into t_photo values('sample', 'Lighthouse.jpg', '', 0, '', false);
-insert into t_photo values('sample', 'Penguins.jpg', '', 0, '', false);
-insert into t_photo values('sample', 'Tulips.jpg', '', 0, '', false);
+insert into t_photo values('201609-11', '1.jpg',
+'https://lh3.googleusercontent.com/-kcW3z6xZ_LCqLmRvS0HsLPeNOHI5_OQXH8-OYO0KbbbJtjSid69hwnmnszULmQ8r52voAYce-sam-rJ6fLecnSUyce0So_EZQk7NaLMuCgJ_MpAcjy1zimkfPi1FHY5jcDoS9msqXcMNaI1lq1pUP1PadlwNVHAE6u1_AxR6kQ_Nym9pX8qfAOF_I3DZYu5Dm6W9O40Hp-M-Q5XUFzy2FPH023DtYsZuVIUCk_4VZnJ7AdyOmxxKSmd_fPUCPumTeYbMIfOxcOolgord13cXBOpae7VNBkb9jpPvvYD9K3uzWS8isFBFuhfaFVQUUSODZb8bC2T8grT4KRlZ5hRzb2TpA1JU6QoXnNWqWmz_ZuaOhrjpNurtiT5k5Aguya34Os868s84yTlsvxtJAxifbF1E9kgvxWfMbc_2UTALthC5KYiGt4siJzvzPiCzdW38pTS6CY0N6qxzLiwo0otqIj9Q_BND4yMlZHeMVUW1RaCgqDbhO2hDBOZz6vGF3Hh9Ld1trn3cjcB5ekgbLECrO66uZKFe5MpGyv3prs1vS7ILvB5D9mla26_G8un12020rIx10SS3khe-5YbCP7w4CoR4zqdJQ-hixEwvb_16im1PkUOgsb5dLBI5gGFHeIr8LR_Armb729y2i7eAkCWf9_qcd8wwojihQGx=w460-h259-no',
+ 0, '', false);
+insert into t_photo values('201609-11', '2.jpg',
+'https://lh3.googleusercontent.com/OaSrcue3dD5TKOA4Hvj3BzYqqtRHhsSHKpG0xgO8IHjWT2o6IGjltGllNDjGwhoSD4oYYuVKpTqE1k5lxrg0te_Ujcah5vqEsct70k_XaD7Ebps28b_pzI2pCUA-oSDHKKpZRWV0cVa3CIbTpBtT9VwSG_Ozj0sgClx_e_BOZ-rRf9G_-qimPVmiIqEA2kXhACma32laRkiDEulkh38mhrpKKruwUP-1VmqFxadXV4MMnLJjgBuPjl2EaeMteszaIw78nmMAOLwGn7O-mLmge_KmeAD4HoPZonUf4IkeU0Txq9baK24r-wNB38AW4IKsz-B_5-Si9O1gk0IsXBjH3eIKvt3-QUbXWs2A67nRUXi7iu1Wd1Jw-d6z1MoTmGSrN_eP81rMO_gqC3yURp_Pn_UaaGRYtdK-gP80ieZL1syZWNAu_fIZvKc73sSy7aikHnEoHUcCAgKv0vrIADWwdxfi_mcG2CULQJQJiT-XhBViUvb9WTkTzMRKDQl-Ey4Sx-sdhsfNrAEE_dwPX8ACJ55HB0Hbug6l41w3vsbhlz4Q-1GHm-qSr2wsm1NdEq30zRX5CrSaWayjwQ6CtCNxnTZLFPV6W9FFp-p0yJ15mg4VPCpO_Ll-A2OlsqZbENCvFpGyQtflD_eedIuPDYxyISqHg3R7QRsY7SSh=w460-h259-no',
+ 0, '', false);
 
 # --- !Downs
 delete from t_photo

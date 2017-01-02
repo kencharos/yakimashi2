@@ -26,10 +26,7 @@
 	   			<img src="@routes.Assets.at(photo.url)" alt="@photo.comment">
 	   		</a>
 				<span class="count">@photo.count</span>
-				@photo.exifDate match {
-					case x if x.length > 0 =>{<span class="date">@x</span>}
-					case _ => {}
-				}
+				<span class="date"><!--not exif--></span>
 				<span class="label">@photo.reqs.map(_.labelId).mkString(",")</span>
 				</div>
    		</div>
