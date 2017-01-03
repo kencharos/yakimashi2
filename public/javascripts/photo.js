@@ -106,7 +106,6 @@ $(document).ready(function(){
 				$("#id").val(data.id)
 				$("#album").val(data.album)
 				$("#name").val(data.name)
-				$("#exifDate").val(data.exifDate)
 				$("#comment").val(data.comment)
 				$("#album").val(data.album)
 				$("#etc").val(data.etc)
@@ -129,7 +128,6 @@ $(document).ready(function(){
 			album:$("#album").val(),
 			name:$("#name").val(),
 			comment:$("#comment").val(),
-			exifDate:$("#exifDate").val(),
 			etc:parseInt($("#etc option:selected").val()),
 			noDisp:$("#noDisp").is(':checked'),
 			reqs:array

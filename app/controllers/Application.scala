@@ -13,9 +13,6 @@ import scala.concurrent.Future
 
 class Application @Inject()(photoDao:PhotoDao, labelDao: LabelDao) extends Controller with Secured {
 
-  def secureAt(path:String, file:String) = withAuthAsync{user =>
-    Assets.at(path, file).apply
-  }
 
   def albums = withAuthAsync{ user => implicit request =>
   	val files = new File("public/album").listFiles();
@@ -26,18 +23,17 @@ class Application @Inject()(photoDao:PhotoDao, labelDao: LabelDao) extends Contr
 
   }
 
-  private def getImages(album:String) = new File("public/album", album).listFiles().filter(_ isFile).sortBy(_ getName).toSeq
-
 
   def photo(album:String) = withAuthAsync { user => implicit request => {
-  	val images = photoDao.findOneByAlbum(album)
+  	val images = photoDao.findPhotosByAlbum(album)
 
     val labels = labelDao.sorted
+    // union 2 future2 to 1 future
     (images.zip(labels)).map{case (p, l) => Ok(views.html.photo(album, p, l))}
   }}
 
   def print(album:String) = withAuthAsync{ user => implicit request =>
-    val photo = photoDao.findOneByAlbum(album)
+    val photo = photoDao.findPhotosByAlbum(album)
     val labels = labelDao.sorted
 
     val data = photo zip labels
@@ -50,6 +46,15 @@ class Application @Inject()(photoDao:PhotoDao, labelDao: LabelDao) extends Contr
     data.map{
       case (photos, labels) =>  Ok(views.html.sheet(album, photos, labels.find(_.id == label).get,labels))
     }
+  }
+
+  def image(album:String, name:String) = withAuthAsync{ user => implicit request =>
+    photoDao.getImage(album, name).map {
+      case Some(image) => Ok(image.image)
+    }
+
+
+
   }
 
 }

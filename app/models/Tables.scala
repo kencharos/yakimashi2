@@ -33,11 +33,11 @@ class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) 
     db.run(q.result.headOption)
   }
   // テーブル定義。必須。
-  private class UsersTable(tag: Tag) extends Table[User](tag, "T_USER") {
-    // IDは大文字である必要がある。
-    def id = column[String]("ID", O.PrimaryKey)
+  private class UsersTable(tag: Tag) extends Table[User](tag, "t_user") {
+    // IDは大文字である必要がある(H2の場合)。
+    def id = column[String]("id", O.PrimaryKey)
 
-    def password = column[String]("PASSWORD")
+    def password = column[String]("password")
     // SQL取得結果とcase classへのマッピング
     def * = (id, password) <>(User.tupled, User.unapply _)
   }
@@ -63,31 +63,35 @@ class LabelDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   )
 
   // テーブル定義。必須。
-  private class LabelsTable(tag: Tag) extends Table[Label](tag, "T_LABEL") {
+  private class LabelsTable(tag: Tag) extends Table[Label](tag, "t_label") {
     // IDは大文字である必要がある。
-    def id = column[String]("ID", O.PrimaryKey)
+    def id = column[String]("id", O.PrimaryKey)
 
-    def name = column[String]("NAME")
+    def name = column[String]("name")
     def * = (id, name) <>(Label.tupled, Label.unapply _)
   }
 }
 
 case class PhotoInner(album:String,
                  name:String,
-                 url:String,
                  etc:Int = 0,
                  comment:String = "",
                  noDisp:Boolean = false){
+  def url = "/image/" + album + "/" + name
 }
 
 case class Photo(album:String,
                  name:String,
-                 url:String,
                  etc:Int = 0,
                  comment:String = "",
                  noDisp:Boolean = false,
                  reqs:Seq[PhotoRequest] = Seq()){
   def count = reqs.size + etc
+  def url = "/image/" + album + "/" + name
+}
+
+case class PhotoImage(album:String,
+                 name:String, image:Array[Byte]){
 }
 
 
@@ -102,6 +106,14 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
 
   private val PhotoRequests = TableQuery[PhotoRequestTable]
 
+  private val PhotoImageRequests = TableQuery[PhotoImageTable]
+
+
+  def albumNames():Future[Seq[String]] = {
+    val q = Photos.map(_.album).distinct.sorted
+    db.run(q.result)
+  }
+
   def findOneByName(album:String, name:String):Future[Option[Photo]] = {
     val q =Photos.filter(p => p.album === album && p.name === name)
       .joinLeft(PhotoRequests).on {case (a,b) => a.album === b.album && a.name === b.name}
@@ -111,17 +123,13 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
       case x => {
         val p = x.head._1
         val reqs = x.map(_._2).flatten // List[Option[A]] -> List[A]
-        Some(Photo(p.album,p.name,  p.url, p.etc, p.comment, p.noDisp, reqs))
+        Some(Photo(p.album,p.name, p.etc, p.comment, p.noDisp, reqs))
       }
     }
   }
 
-  def albumNames():Future[Seq[String]] = {
-    val q = Photos.map(_.album).distinct.sorted
-    db.run(q.result)
-  }
 
-  def findOneByAlbum(album:String):Future[Seq[Photo]] = {
+  def findPhotosByAlbum(album:String):Future[Seq[Photo]] = {
     val q =Photos.filter(p => p.album === album)
       .joinLeft(PhotoRequests).on {case (a,b) => a.album === b.album && a.name === b.name}
       .sortBy{case (p, _) => (p.album, p.name)}
@@ -132,7 +140,7 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
         def groupByPhoto(p:PhotoInner, recs:Iterable[(PhotoInner, Option[PhotoRequest])]) = {
 
           val reqs = recs.map(_._2).flatten.toSeq // List[Option[A]] -> List[A]
-          Photo(p.album, p.name, p.url, p.etc, p.comment, p.noDisp, reqs)
+          Photo(p.album, p.name, p.etc, p.comment, p.noDisp, reqs)
         }
 
         x.groupBy{case (p, req) => p}.map{case (p, recs) => groupByPhoto(p, recs)}.toSeq
@@ -146,6 +154,11 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
       ) yield (p)
     // subquery exisits.
     db.run(query.filter(p => PhotoRequests.filter(r => r.labelId === label && p.name === r.name && p.album===r.album).exists).result)
+  }
+
+  def getImage(album:String, name:String):Future[Option[PhotoImage]] = {
+    val q = for( r <- PhotoImageRequests; if r.album === album && r.name ===name) yield(r)
+    db.run(q.result.headOption)
   }
 
   def deleteReqByLabel(album:String, labelId:String) = {
@@ -162,10 +175,10 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   }
 
   def save(photo:Photo) = {
-    val p = PhotoInner(photo.album, photo.name, photo.url, photo.etc, photo.comment, photo.noDisp)
+    val p = PhotoInner(photo.album, photo.name, photo.etc, photo.comment, photo.noDisp)
     def innerSave(pi:PhotoInner) = {
-      //Photos.filter(p => p.album === photo.album && p.name === photo.name).delete  >> (Photos += pi )
-      Photos.insertOrUpdate(pi)
+      Photos.filter(p => p.album === photo.album && p.name === photo.name).map(t =>(t.etc,t.comment,t.noDisp))
+          .update((pi.etc,pi.comment,pi.noDisp))
     }
 
     val action = for(
@@ -177,21 +190,28 @@ class PhotoDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   }
 
   // テーブル定義。必須。
-  private class PhotosTable(tag: Tag) extends Table[PhotoInner](tag, "T_PHOTO") {
-    def album = column[String]("ALBUM", O.PrimaryKey)
-    def name = column[String]("NAME", O.PrimaryKey)
-    def url = column[String]("URL", O.PrimaryKey)
-    def etc = column[Int]("ETC")
-    def comment = column[String]("COMMENT")
-    def noDisp = column[Boolean]("NO_DISP")
+  private class PhotosTable(tag: Tag) extends Table[PhotoInner](tag, "t_photo") {
+    def album = column[String]("album", O.PrimaryKey)
+    def name = column[String]("name", O.PrimaryKey)
+    def etc = column[Int]("etc")
+    def comment = column[String]("comment")
+    def noDisp = column[Boolean]("no_disp")
     def pks = primaryKey("pk_photo", (album, name))
-    def * = (album, name,url,etc,comment, noDisp) <>(PhotoInner.tupled, PhotoInner.unapply _)
+    def * = (album, name,etc,comment, noDisp) <>(PhotoInner.tupled, PhotoInner.unapply _)
   }
-  private class PhotoRequestTable(tag: Tag) extends Table[PhotoRequest](tag, "T_PHOTO_REQUEST") {
-    def album = column[String]("ALBUM", O.PrimaryKey)
-    def name = column[String]("NAME", O.PrimaryKey)
-    def labelId = column[String]("LABEL_ID", O.PrimaryKey)
+  private class PhotoRequestTable(tag: Tag) extends Table[PhotoRequest](tag, "t_photo_request") {
+    def album = column[String]("album", O.PrimaryKey)
+    def name = column[String]("name", O.PrimaryKey)
+    def labelId = column[String]("label_id", O.PrimaryKey)
     def pks = primaryKey("pk_photo_request", (album, name, labelId))
     def * = (album, name, labelId) <>(PhotoRequest.tupled, PhotoRequest.unapply _)
+  }
+
+  private class PhotoImageTable(tag: Tag) extends Table[PhotoImage](tag, "t_photo_image") {
+    def album = column[String]("album", O.PrimaryKey)
+    def name = column[String]("name", O.PrimaryKey)
+    def image = column[Array[Byte]]("image")
+    def pks = primaryKey("pk_photo_image", (album, name))
+    def * = (album, name, image) <>(PhotoImage.tupled, PhotoImage.unapply _)
   }
 }

@@ -15,11 +15,18 @@ create table T_LABEL (
 create table T_PHOTO (
   album    varchar(255) not null,
   name     varchar(255) not null,
-  url    varchar(1200),
   etc   integer,
   comment varchar(300),
   no_disp boolean,
   constraint PK_T_PHOTO primary key (album, name))
+;
+
+
+create table T_PHOTO_IMAGE (
+  album    varchar(255) not null,
+  name     varchar(255) not null,
+  image    bytea not null,
+  constraint PK_T_PHOTO_IMAGE primary key (album, name))
 ;
 
 create table T_PHOTO_REQUEST (
@@ -37,6 +44,7 @@ drop table if exists T_USER;
 drop table if exists T_LABEL;
 drop table if exists T_PHOTO;
 drop table if exists T_PHOTO_REQUEST;
+drop table if exists T_PHOTO_IMAGE;
 
 SET REFERENTIAL_INTEGRITY TRUE;
 

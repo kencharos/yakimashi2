@@ -16,7 +16,7 @@
 		</div>
 		@for(photo <- photos) {
 			<div class="tile"><div>
-				<a href="@photo.url" class="swipebox" title="@photo.comment">
+				<a href="album/@photo.album/@photo.name" class="swipebox" title="@photo.comment">
 					<img src="@photo.url" alt="@photo.comment">
 				</a>
 			</div></div>

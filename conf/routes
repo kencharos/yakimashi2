@@ -5,12 +5,12 @@ POST 	/login						controllers.Auth.authenticate
 GET 	/logout						controllers.Auth.logout
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/album/*file         controllers.Application.secureAt(path="/public/album", file)
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 GET		/albums						controllers.Application.albums
 GET		/albums/:album				controllers.Application.photo(album:String)
 GET		/albums/:album/print				controllers.Application.print(album:String)
 GET		/albums/:album/:label				controllers.Application.sheet(album:String, label:String)
+GET		/image/:album/:name				controllers.Application.image(album:String, name:String)
 GET		/photo				controllers.PhotoEdit.info(album:String, name:String)
 POST	/photo				controllers.PhotoEdit.update
 POST	/photo/:album/:label		controllers.PhotoEdit.deleteLabel(album:String, label:String)
