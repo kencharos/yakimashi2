@@ -22,7 +22,7 @@
    @for(photo <- photos) {
    		<div class="tile @noDisp(photo.noDisp)">
    			<div>
-   			<a href="album/@photo.album/@photo.name" title="@photo.comment">
+   			<a href="@photo.url" title="@photo.comment">
 	   			<img src="@photo.url" alt="@photo.comment">
 	   		</a>
 				<span class="count">@photo.count</span>
