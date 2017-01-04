@@ -1,1 +1,1 @@
-web: target/universal/stage/bin/yakimashi2 -Dapplication.secret="3289fdkalc@77sfdsafdccnbdsw@ddd##$dds" -Dhttp.port=${PORT} -Dplay.evolutions.db.default.autoApply=true -Dslick.dbs.default.db.url=${JDBC_DATABASE_URL} -Dplay.db.default.hikaricp.maximumPoolSize=4
+web: target/universal/stage/bin/yakimashi2 -Dapplication.secret="3289fdkalc@77sfdsafdccnbdsw@ddd##$dds" -Dhttp.port=${PORT} -Dplay.evolutions.db.default.autoApply=true -Dslick.dbs.default.db.url=${JDBC_DATABASE_URL}

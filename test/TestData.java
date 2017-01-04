@@ -18,11 +18,15 @@ public class TestData {
         Config conf = ConfigFactory.load("application.conf");
 
        String url = conf.getString("slick.dbs.default.db.url");
+       url = "<paset heroku run echo $JDBC_DATABASE_URL>";
        String driver = conf.getString("slick.dbs.default.db.driver");
 
        Class.forName(driver);
 
        Connection con = DriverManager.getConnection(url);
+
+       con.prepareStatement("delete from T_PHOTO").executeUpdate();
+        con.prepareStatement("delete from T_PHOTO_IMAGE").executeUpdate();
 
         PreparedStatement photo = con.prepareStatement("INSERT INTO T_PHOTO values(?,?,0,'',false)");
         PreparedStatement image = con.prepareStatement("INSERT INTO T_PHOTO_IMAGE values(?,?,?)");
@@ -39,6 +43,7 @@ public class TestData {
             image.setString(2,f.getName());
             image.setBinaryStream(3, new FileInputStream(f));
             image.executeUpdate();
+            //con.commit();
         }
 
         con.close();
